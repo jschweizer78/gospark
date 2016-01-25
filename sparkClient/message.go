@@ -19,3 +19,11 @@ type SparkMessage struct {
 type SparkMessages struct {
 	Items []SparkMessage `json:"items"`
 }
+
+// MessagesQueryParam represents a query to the messgae service
+type MessagesQueryParam struct {
+	RoomID        string
+	Before        string
+	BeforeMessage string
+	Max           int
+}
