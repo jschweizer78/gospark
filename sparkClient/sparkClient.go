@@ -1,5 +1,4 @@
-// Cisco Spark Client to get information from the spark service.
-//
+// Package sparkClient for Cisco Spark to get information from, and post to, the spark collabration service.
 package sparkClient
 
 import (
@@ -16,28 +15,80 @@ import (
 	"github.com/joeshaw/envdecode"
 )
 
+// SparkRoom represents a Cisco Spark Room (probably red as the dir is called that.. should just be called rooms)
 type SparkRoom struct {
-	Id           string
-	Title        string
+	ID           string `json:"id"`
+	Title        string `json:"title"`
+	SipAddress   string `json:"sipAddress"`
 	LastActivity time.Time
-	Create       time.Time
+	Created      time.Time `json:"created"`
 }
 
+// SparkRooms represents a slice of Cisco Spark Rooms @ "Items"
 type SparkRooms struct {
-	Items []SparkRoom
+	Items []SparkRoom `json:"items"`
 }
 
-type sparkClient struct {
+// SparkPerson represents a Cisco Spark Person
+type SparkPerson struct {
+	ID          string    `json:"id"`
+	Emails      string    `json:"emails"`
+	DisplayName string    `json:"displayName"`
+	Avatar      string    `json:"avatar"`
+	Created     time.Time `json:"created"`
+}
+
+// SparkPeople represents a slice of Cisco Spark Person(s)
+type SparkPeople struct {
+	Items []SparkPerson `json:"items"`
+}
+
+// SparkMessage represents a Cisco Spark Message
+type SparkMessage struct {
+	ID            string    `json:"id"`
+	Emails        string    `json:"personId"`
+	DisplayName   string    `json:"personEmail"`
+	Avatar        string    `json:"roomId"`
+	Text          string    `json:"text"`
+	Files         string    `json:"files"`
+	ToPersonID    string    `json:"toPersonId"`    //for private messages
+	ToPersonEmail string    `json:"toPersonEmail"` //for private messages
+	Created       time.Time `json:"created"`
+}
+
+// SparkMessages represents a slice of Cisco Spark Messag(s)
+type SparkMessages struct {
+	Items []SparkMessage `json:"items"`
+}
+
+// SparkWebhook represents a Cisco Spark Webhook
+type SparkWebhook struct {
+	ID        string    `json:"id"`
+	Name      string    `json:"name"`
+	TargetURL string    `json:"targetUrl"`
+	Resource  string    `json:"resource"`
+	Event     string    `json:"event"`
+	Filter    string    `json:"filter"`
+	Create    time.Time `json:"created"`
+}
+
+// SparkWebhooks represents a slice of Cisco Spark Webhook(s)
+type SparkWebhooks struct {
+	Items []SparkMessage `json:"items"`
+}
+
+// SparkClient used to interact with Cisco Spark API
+type SparkClient struct {
 	authtoken  string
 	conn       net.Conn
 	httpClient *http.Client
 	reader     io.ReadCloser
 }
 
-var sparkURL string = "https://api.ciscospark.com/v1"
+var sparkURL = "https://api.ciscospark.com/v1"
 
 // This function is used by the client requests to perform the transaction
-func (s *sparkClient) processRequest(req *http.Request) (response []byte) {
+func (s *SparkClient) processRequest(req *http.Request) (response []byte) {
 	req.Header.Set("Authorization", "Bearer "+s.authtoken)
 	req.Header.Set("Content-Type", "application/json")
 	resp, err := s.httpClient.Do(req)
@@ -59,12 +110,13 @@ func (s *sparkClient) processRequest(req *http.Request) (response []byte) {
 	return body
 }
 
-func (s *sparkClient) PostMessageToSparkRoom(text string, roomId string, fileURL string) {
+// PostMessageToSparkRoom used to post to a Cisco Spark Room(this will be added as a method of the Room struct)
+func (s *SparkClient) PostMessageToSparkRoom(text string, roomID string, fileURL string) {
 	var jsonString string
 	if fileURL != "" {
-		jsonString = fmt.Sprintf("{ \"roomId\" : \"%s\" ,  \"file\" : \"%s\" , \"text\" : \"%s\" }", roomId, fileURL, text)
+		jsonString = fmt.Sprintf("{ \"roomId\" : \"%s\" ,  \"file\" : \"%s\" , \"text\" : \"%s\" }", roomID, fileURL, text)
 	} else {
-		jsonString = fmt.Sprintf("{ \"roomId\" : \"%s\" ,  \"text\" : \"%s\" }", roomId, text)
+		jsonString = fmt.Sprintf("{ \"roomId\" : \"%s\" ,  \"text\" : \"%s\" }", roomID, text)
 	}
 	//fmt.Println(jsonString)
 	var jsonStr = []byte(jsonString)
@@ -78,8 +130,9 @@ func (s *sparkClient) PostMessageToSparkRoom(text string, roomId string, fileURL
 	//fmt.Printf("%s", str)
 }
 
-func (s *sparkClient) AddMemberToSparkRoom(email string, roomId string, isModerator bool) {
-	jsonString := fmt.Sprintf("{ \"roomId\" : \"%s\" , \"personEmail\" : \"%s\", \"isModerator\" : %t }", roomId, email, isModerator)
+// AddMemberToSparkRoom used to add people to a Cisco Spark Room(this will be added as a method of the Room struct)
+func (s *SparkClient) AddMemberToSparkRoom(email string, roomID string, isModerator bool) {
+	jsonString := fmt.Sprintf("{ \"roomId\" : \"%s\" , \"personEmail\" : \"%s\", \"isModerator\" : %t }", roomID, email, isModerator)
 	//fmt.Println(jsonString)
 	var jsonStr = []byte(jsonString)
 	req, err := http.NewRequest("POST", sparkURL+"/memberships", bytes.NewBuffer(jsonStr))
@@ -91,8 +144,8 @@ func (s *sparkClient) AddMemberToSparkRoom(email string, roomId string, isModera
 	//fmt.Printf("%s", str)
 }
 
-// This function will create a new Spark Room
-func (s *sparkClient) NewRoom(roomName string) SparkRoom {
+// NewRoom This function will create a new Spark Room
+func (s *SparkClient) NewRoom(roomName string) SparkRoom {
 	jsonString := fmt.Sprintf("{ \"title\" : \"%s\" }", roomName)
 	var jsonStr = []byte(jsonString)
 	req, err := http.NewRequest("POST", sparkURL+"/rooms", bytes.NewBuffer(jsonStr))
@@ -108,8 +161,8 @@ func (s *sparkClient) NewRoom(roomName string) SparkRoom {
 	return room
 }
 
-// This function lists all the rooms in the Spark api.
-func (s *sparkClient) Rooms() []SparkRoom {
+// Rooms function lists all the rooms in the Spark api.
+func (s *SparkClient) Rooms() []SparkRoom {
 	req, err := http.NewRequest("GET", sparkURL+"/rooms", nil)
 	if err != nil {
 		log.Println("creating request failed:", err)
@@ -125,11 +178,11 @@ func (s *sparkClient) Rooms() []SparkRoom {
 	return rooms.Items
 }
 
-// Creates a New SparkClient to be used.
+// New creates a new SparkClient to be used.
 // s := sparkClient.New()
 // s.Rooms()
 // requires that the environment variable: "SPARK_AUTH_TOKEN" be defined
-func New() *sparkClient {
+func New() *SparkClient {
 	var conn net.Conn
 	var r io.ReadCloser
 
@@ -157,10 +210,20 @@ func New() *sparkClient {
 		},
 	}
 
-	return &sparkClient{
+	return &SparkClient{
 		authtoken:  conf.AuthToken,
 		conn:       conn,
 		httpClient: client,
 		reader:     r,
 	}
+}
+
+// NewWithToken Creates a New SparkClient to be used.
+// s := sparkClient.NewWithToken(string)
+// s.Rooms()
+// requires that the token be provided. Such as with oauth
+func NewWithToken(token string) *SparkClient {
+	sc := New()
+	sc.authtoken = token
+	return sc
 }
