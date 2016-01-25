@@ -15,68 +15,6 @@ import (
 	"github.com/joeshaw/envdecode"
 )
 
-// SparkRoom represents a Cisco Spark Room (probably red as the dir is called that.. should just be called rooms)
-type SparkRoom struct {
-	ID           string `json:"id"`
-	Title        string `json:"title"`
-	SipAddress   string `json:"sipAddress"`
-	LastActivity time.Time
-	Created      time.Time `json:"created"`
-}
-
-// SparkRooms represents a slice of Cisco Spark Rooms @ "Items"
-type SparkRooms struct {
-	Items []SparkRoom `json:"items"`
-}
-
-// SparkPerson represents a Cisco Spark Person
-type SparkPerson struct {
-	ID          string    `json:"id"`
-	Emails      string    `json:"emails"`
-	DisplayName string    `json:"displayName"`
-	Avatar      string    `json:"avatar"`
-	Created     time.Time `json:"created"`
-}
-
-// SparkPeople represents a slice of Cisco Spark Person(s)
-type SparkPeople struct {
-	Items []SparkPerson `json:"items"`
-}
-
-// SparkMessage represents a Cisco Spark Message
-type SparkMessage struct {
-	ID            string    `json:"id"`
-	Emails        string    `json:"personId"`
-	DisplayName   string    `json:"personEmail"`
-	Avatar        string    `json:"roomId"`
-	Text          string    `json:"text"`
-	Files         string    `json:"files"`
-	ToPersonID    string    `json:"toPersonId"`    //for private messages
-	ToPersonEmail string    `json:"toPersonEmail"` //for private messages
-	Created       time.Time `json:"created"`
-}
-
-// SparkMessages represents a slice of Cisco Spark Messag(s)
-type SparkMessages struct {
-	Items []SparkMessage `json:"items"`
-}
-
-// SparkWebhook represents a Cisco Spark Webhook
-type SparkWebhook struct {
-	ID        string    `json:"id"`
-	Name      string    `json:"name"`
-	TargetURL string    `json:"targetUrl"`
-	Resource  string    `json:"resource"`
-	Event     string    `json:"event"`
-	Filter    string    `json:"filter"`
-	Create    time.Time `json:"created"`
-}
-
-// SparkWebhooks represents a slice of Cisco Spark Webhook(s)
-type SparkWebhooks struct {
-	Items []SparkMessage `json:"items"`
-}
-
 // SparkClient used to interact with Cisco Spark API
 type SparkClient struct {
 	authtoken  string
