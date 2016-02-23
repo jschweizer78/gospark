@@ -25,6 +25,10 @@ type SparkClient struct {
 
 var sparkURL = "https://api.ciscospark.com/v1"
 
+func (s *SparkClient)SetAuthToken(token string)  {
+	s.authtoken = token
+}
+
 // This function is used by the client requests to perform the transaction
 func (s *SparkClient) processRequest(req *http.Request) (response []byte) {
 	req.Header.Set("Authorization", "Bearer "+s.authtoken)
@@ -161,7 +165,34 @@ func New() *SparkClient {
 // s.Rooms()
 // requires that the token be provided. Such as with oauth
 func NewWithToken(token string) *SparkClient {
-	sc := New()
-	sc.authtoken = token
-	return sc
+	var conn net.Conn
+	var r io.ReadCloser
+
+	var conf struct {
+		AuthToken string `env:"SPARK_AUTH_TOKEN"`
+	}
+	conf.AuthToken = token
+	client := &http.Client{
+		Transport: &http.Transport{
+			Dial: func(netw, addr string) (net.Conn, error) {
+				if conn != nil {
+					conn.Close()
+					conn = nil
+				}
+				netc, err := net.DialTimeout(netw, addr, 5*time.Second)
+				if err != nil {
+					return nil, err
+				}
+				conn = netc
+				return netc, nil
+			},
+		},
+	}
+
+	return &SparkClient{
+		authtoken:  conf.AuthToken,
+		conn:       conn,
+		httpClient: client,
+		reader:     r,
+	}
 }
