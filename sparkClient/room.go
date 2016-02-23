@@ -6,11 +6,13 @@ import (
 	"log"
 	"net/http"
 	"time"
+  "google.golang.org/appengine/datastore"
 )
 
 // SparkRoom represents a Cisco Spark Room (probably red as the dir is called that.. should just be called rooms)
 type SparkRoom struct {
-	ID           string `json:"id"`
+	key *datastore.Key
+	ID           string `json:"id" datastore:"Id"`
 	Title        string `json:"title"`
 	SipAddress   string `json:"sipAddress"`
 	LastActivity time.Time
@@ -23,6 +25,14 @@ type SparkRooms struct {
 	Items []SparkRoom `json:"items"`
 }
 
+// SetKey sets the datastore Key internally to package
+func (sr *SparkRoom)SetKey(key *datastore.Key)  {
+	sr.key = key
+}
+
+func (sr *SparkRoom)GetKeyString() string {
+	return sr.key.Encode()
+}
 // PostMessage used to post to this Cisco Spark Room.
 func (sr *SparkRoom) PostMessage(text string, fileURL string) {
 	var jsonString string
