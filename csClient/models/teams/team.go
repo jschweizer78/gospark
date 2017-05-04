@@ -16,3 +16,13 @@ type TeamMembership struct {
 	IsModerator bool   `json:"isModerator"`
 	Created     string `json:"created"`
 }
+
+// Teams to model a list of Team
+type Teams struct {
+	Items []Teams
+}
+
+// TeamMemberships to model a list of TeamMembership
+type TeamMemberships struct {
+	Items []TeamMembership
+}

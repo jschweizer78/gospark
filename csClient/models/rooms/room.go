@@ -1,6 +1,6 @@
 package rooms
 
-// Message is a model of a Spark Room
+// Room is a model of a Spark Room
 type Room struct {
 	ID           string `json:"id"`
 	Title        string `json:"title"`
@@ -9,4 +9,9 @@ type Room struct {
 	TeamID       string `json:"teamId"`
 	LastActivity string `json:"lastActivity"`
 	Created      string `json:"created"`
+}
+
+// Rooms to model a list of Rooms
+type Rooms struct {
+	Items []Room
 }

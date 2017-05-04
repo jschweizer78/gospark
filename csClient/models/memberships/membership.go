@@ -11,14 +11,7 @@ type Membership struct {
 	Created     string `json:"created"`
 }
 
-/*
-
-   "id" : "Y2lzY29zcGFyazovL3VzL01FTUJFUlNISVAvMGQwYzkxYjYtY2U2MC00NzI1LWI2ZDAtMzQ1NWQ1ZDExZWYzOmNkZTFkZDQwLTJmMGQtMTFlNS1iYTljLTdiNjU1NmQyMjA3Yg",
-   "roomId" : "Y2lzY29zcGFyazovL3VzL1JPT00vYmJjZWIxYWQtNDNmMS0zYjU4LTkxNDctZjE0YmIwYzRkMTU0",
-   "personId" : "Y2lzY29zcGFyazovL3VzL1BFT1BMRS9mNWIzNjE4Ny1jOGRkLTQ3MjctOGIyZi1mOWM0NDdmMjkwNDY",
-   "personEmail" : "r2d2@example.com",
-   "isModerator" : true,
-   "isMonitor" : true,
-   "created" : "2015-10-18T14:26:16+00:00"
-
-*/
+// Memberships to model a list of Memberships
+type Memberships struct {
+	Items []Membership
+}
