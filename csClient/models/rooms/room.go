@@ -1,5 +1,6 @@
 package rooms
 
+// Message is a model of a Spark Room
 type Room struct {
 	ID           string `json:"id"`
 	Title        string `json:"title"`
