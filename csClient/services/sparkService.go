@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -12,8 +13,9 @@ import (
 	"github.com/jschweizer78/gospark/csClient/models/rooms"
 )
 
-var sparkURL string = "https://api.ciscospark.com/v1"
+var sparkURL = "https://api.ciscospark.com/v1"
 
+// SparkServ is used to CRUD the Spark Cloud.
 type SparkServ struct {
 	cs *csClient.SparkClient
 }
@@ -21,6 +23,10 @@ type SparkServ struct {
 // NewService is used to create new Spark service
 func NewService(cs *csClient.SparkClient) (*SparkServ, error) {
 	return &SparkServ{cs}, nil
+}
+
+func (ss *SparkServ) ProcessRequest(req *http.Request) (response []byte) {
+	return ss.processRequest(req)
 }
 
 func (ss *SparkServ) processRequest(req *http.Request) (response []byte) {
@@ -77,4 +83,59 @@ func (ss *SparkServ) AddMemberToRoom(mem people.Person, room rooms.Room, isModer
 	ss.processRequest(req)
 	//str := s.processRequest(req)
 	//fmt.Printf("%s", str)
+}
+
+// NewRoom is used to create a new Spark room
+// This function will create a new Spark Room
+func (ss *SparkServ) NewRoom(roomName string) rooms.Room {
+	jsonString := fmt.Sprintf("{ \"title\" : \"%s\" }", roomName)
+	var jsonStr = []byte(jsonString)
+	req, err := http.NewRequest("POST", sparkURL+"/rooms", bytes.NewBuffer(jsonStr))
+	if err != nil {
+		log.Println("creating request failed:", err)
+	}
+	jsonOut := ss.processRequest(req)
+	var room rooms.Room
+	err = json.Unmarshal(jsonOut, &room)
+	if err != nil {
+		log.Println("error: ", err)
+	}
+	return room
+}
+
+// ListRooms Gets a list of Room for a given Auth Token
+// This function lists all the rooms in the Spark api.
+func (ss *SparkServ) ListRooms() rooms.Rooms {
+	req, err := http.NewRequest("GET", sparkURL+"/rooms", nil)
+	if err != nil {
+		log.Println("creating request failed:", err)
+	}
+
+	jsonOut := ss.processRequest(req)
+	var rooms rooms.Rooms
+	err = json.Unmarshal(jsonOut, &rooms)
+	if err != nil {
+		log.Println("error: ", err)
+	}
+	//fmt.Printf("%+v", rooms)
+	return rooms
+}
+
+// GetRoomByID Gets a of Room for by ID
+// This function lists all the rooms in the Spark api.
+func (ss *SparkServ) GetRoomByID(id string) rooms.Room {
+	reqParam := fmt.Sprintf("%s/rooms/%s", sparkURL, id)
+	req, err := http.NewRequest("GET", reqParam, nil)
+	if err != nil {
+		log.Println("creating request failed:", err)
+	}
+
+	jsonOut := ss.processRequest(req)
+	var room rooms.Room
+	err = json.Unmarshal(jsonOut, &room)
+	if err != nil {
+		log.Println("error: ", err)
+	}
+	//fmt.Printf("%+v", rooms)
+	return room
 }

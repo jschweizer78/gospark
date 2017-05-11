@@ -3,7 +3,7 @@ package people
 // Person is a model of a "People"
 type Person struct {
 	ID            string   `json:"id"`
-	Emails        string   `json:"emails"`
+	Emails        []string `json:"emails"`
 	DisplayName   string   `json:"displayName"`
 	FirstName     string   `json:"firstName"`
 	LastName      string   `json:"lastName"`
